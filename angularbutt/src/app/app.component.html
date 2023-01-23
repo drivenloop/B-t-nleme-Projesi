@@ -1,0 +1,47 @@
+<mat-toolbar color="primary">
+  Angular Anket
+  <div class="toolbar_items">
+    <button mat-button routerLink="/forms">
+      Anket</button>
+      <!-- <button mat-button routerLink="/answers">
+        Cevaplar</button> -->
+        <button mat-button routerLink="/message">
+          Mesajlar</button>
+  </div>
+  <ng-container *ngIf="user$ | async as user; else loginButton">
+    <button mat-button [matMenuTriggerFor]="userMenu">
+      <img
+        width="40"
+        height="50"
+        class="profile-image-toolbar"
+        [src]="user.photoURL ?? 'assets/images/image-placeholder.png'"
+      />
+      <span class="profile-text">
+        {{ user.displayName }}
+      </span>
+      <mat-icon>expand_more</mat-icon>
+    </button>
+  </ng-container>
+
+  <ng-template #loginButton>
+    <button mat-button routerLink="login">
+      <mat-icon>login</mat-icon>
+      Giriş
+    </button>
+  </ng-template>
+</mat-toolbar>
+
+<div class="content">
+  <router-outlet></router-outlet>
+</div>
+
+<mat-menu #userMenu="matMenu">
+  <button mat-menu-item routerLink="/profile">
+    <mat-icon>account_circle</mat-icon>
+    Profil
+  </button>
+  <button mat-menu-item (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Çıkış
+  </button>
+</mat-menu>

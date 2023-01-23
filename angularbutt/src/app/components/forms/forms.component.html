@@ -1,0 +1,203 @@
+<h2 class="page-title">Forms</h2>
+<mat-list>
+  <a mat-list-item *ngFor="let item of forms" [routerLink]="['/forms', item.id]">
+    <h4 mat-line>{{item.surveyTitle}}</h4>
+  </a>
+</mat-list>
+<h2 class="page-title">Anket Oluştur</h2>
+<mat-card>
+
+  <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()" autocomplete="off">
+    <mat-form-field class="full-width">
+      <input formControlName="surveyTitle" matInput placeholder="Anket Başlığı" maxlength="50" [required]="true">
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-select formControlName="surveyType" placeholder="Tür Seçin" [required]="true">
+        <mat-option *ngFor="let surveyType of surveyTypes" [value]="surveyType.value">
+          {{surveyType.value}}
+
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-slide-toggle formControlName="IsAnonymous" class="mb-10">Anketi Anonim Yap </mat-slide-toggle>
+
+    <div class="survey-options">
+
+      <div formArrayName="surveyQuestions" class="poll-options">
+        <h3 class="list-title">Anket Soru Ekle </h3>
+
+
+        <ol class="list-style">
+          <li *ngFor="let questionCtrl of surveyForm.get('surveyQuestions')['controls']; let i = index">
+            <div [formGroupName]="i">
+              <div>
+                <mat-form-field class="full-width">
+                  <input formControlName="questionTitle" maxlength="200" matInput placeholder="Soru Başlığı"
+                    [required]="true">
+                </mat-form-field>
+                <mat-form-field class="full-width">
+                  <mat-select formControlName="questionType" placeholder="Soru Türü" ng-model="myVar"
+                    [(value)]="selectedOption[i]" (selectionChange)="onSeletQuestionType(selectedOption[i], i)"
+                    [required]="true">
+                    <mat-option *ngFor="let type of questions" [value]="type.value">
+                      {{type.viewValue}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <div formGroupName="questionGroup" [ngSwitch]="selectedOption[i]">
+                  <div *ngSwitchCase="'Single choice'">
+                    <div *ngIf="questionCtrl.controls.questionGroup.controls.options">
+                      <ul class="question-type" formArrayName="options">
+                        <li
+                          *ngFor="let optionCtrl of questionCtrl.controls.questionGroup.controls.options.controls let j = index">
+                          <div [formGroupName]="j">
+
+                            <mat-form-field>
+                              <input formControlName="optionText" matInput placeholder="option text" maxlength="100"
+                                [required]="true">
+                            </mat-form-field>
+
+                            <button *ngIf="j>=2" (click)="removeOption(i,j)" color="warn">X
+
+                            </button>
+
+                          </div>
+                        </li>
+                      </ul>
+                      <button mat-raised-button type="button" (click)="addOption(i)"
+                        class="mat-sm-button add-option-btn" color="accent"> Seçenek Ekle</button>
+                    </div>
+                    <div *ngIf="questionCtrl.controls.questionGroup.controls.showRemarksBox">
+                      <mat-slide-toggle formControlName="showRemarksBox">
+                        Yorum Kutusu Göster
+                      </mat-slide-toggle>
+                      <mat-form-field class="full-width">
+                        <textarea style="resize: none;" disabled matInput placeholder="Textarea"></textarea>
+                      </mat-form-field>
+                    </div>
+
+                  </div>
+                  <div *ngSwitchCase="'Multi choice'">
+                    <div *ngIf="questionCtrl.controls.questionGroup.controls.options">
+                      <ul class="question-type" formArrayName="options">
+                        <li
+                          *ngFor="let optionCtrl of questionCtrl.controls.questionGroup.controls.options.controls let j = index">
+                          <div [formGroupName]="j">
+
+                            <mat-form-field>
+                              <input formControlName="optionText" matInput placeholder="option text" maxlength="100"
+                                [required]="true">
+                            </mat-form-field>
+
+                            <button mat-raised-button *ngIf="j>=2" (click)="removeOption(i,j)" color="warn">
+                              X
+                            </button>
+
+                          </div>
+                        </li>
+                      </ul>
+                      <button mat-raised-button type="button" (click)="addOption(i)"
+                        class="mat-sm-button add-option-btn" color="accent"> Add option</button>
+                    </div>
+                    <div *ngIf="questionCtrl.controls.questionGroup.controls.showRemarksBox">
+                      <mat-slide-toggle formControlName="showRemarksBox">
+                        Yorum Kutusu Göster
+                      </mat-slide-toggle>
+                      <mat-form-field class="full-width">
+                        <textarea style="resize: none;" disabled matInput placeholder="Textarea"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div *ngSwitchCase="'Text'">
+
+                    <mat-form-field class="full-width">
+                      <textarea style="resize: none;" disabled matInput placeholder="Textarea"></textarea>
+                    </mat-form-field>
+
+                  </div>
+                  <div *ngSwitchCase="'Rating'">
+                    Yıldız Seçenekleri
+                  </div>
+
+                </div>
+
+              </div>
+              <button *ngIf="i>0" mat-mini-fab color="warn" type="button" (click)="onRemoveQuestion(i)"
+                class="poll-remove-btn">
+                X
+              </button>
+            </div>
+          </li>
+        </ol>
+        <div fxLayout="row" fxLayoutAlign="end">
+          <button type="button" mat-raised-button (click)="onAddQuestion()">
+            Soru Ekle
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="button-row" style="margin-top: 15px;">
+      <button class="full-width" color="primary" type="submit" mat-raised-button [disabled]="!surveyForm.valid">
+
+
+        <span *ngIf="!editMode">Yeni Anket Ekle</span>
+        <span *ngIf="editMode">Anketi Güncelle</span>
+      </button>
+    </div>
+  </form>
+</mat-card>
+
+<!-- <mat-card *ngFor="let form of forms">
+  <mat-card-title>{{ form.form_name }}</mat-card-title>
+  <mat-card-content>
+    <mat-list>
+      <mat-list-item *ngFor="let question of questions">
+        <div >{{ question.label }}</div>
+        <div>{{ question.type }}</div>
+        <div *ngIf="question.options">{{ question.options.join(', ') }}</div>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-raised-button color="primary" >Edit</button>
+    <button mat-raised-button color="warn" >Delete</button>
+  </mat-card-actions>
+</mat-card>
+<mat-card>
+  <mat-card-title>New Form</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="quests" (ngSubmit)="onSubmit()">
+      <mat-form-field>
+        <input matInput placeholder="Form Name" formControlName="form_name">
+      </mat-form-field>
+        <div *ngFor="let question of questions">
+        <mat-form-field>
+          <input matInput placeholder="Question Label" formControlName="label">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Question Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="text">Text</mat-option>
+            <mat-option value="radio">Radio</mat-option>
+            <mat-option value="checkbox">Checkbox</mat-option>
+            <mat-option value="select">Select</mat-option>
+          </mat-select>
+          {{ question.type }}
+        </mat-form-field>
+        <mat-form-field
+          *ngIf="question.type === 'radio' || question.type === 'checkbox' || question.type === 'select'">
+          <mat-label>Question Options</mat-label>
+          <mat-select multiple formControlName="options">
+            <mat-option *ngFor="let option of question.options" [value]="option">{{ option }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary">Create Form</button>
+    </form>
+  </mat-card-content>
+</mat-card> -->
